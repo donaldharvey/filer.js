@@ -751,7 +751,7 @@ var Filer = new function() {
    * @param {string|FileEntry} entryOrPath A path, filesystem URL, or FileEntry
     *     of the file to lookup.
    * @param {object} dataObj The data to write. Example:
-   *     {data: string|Blob|File|ArrayBuffer, type: mimetype, append: true}
+   *     {data: string|Blob|File|ArrayBuffer, type: mimetype, append: true, pos: 61}
    *     If append is specified, data is appended to the end of the file.
    * @param {Function} opt_successCallback Success callback, which is passed
    *     the created FileEntry and FileWriter object used to write the data.
@@ -775,10 +775,13 @@ var Filer = new function() {
 
           fileWriter.seek(fileWriter.length); // Start write position at EOF.
         } else {
+          if (dataObj.pos !== undefined) { 
+            fileWriter.seek(dataObj.pos)
+          }
           var truncated = false;
           fileWriter.onwriteend = function(e) {
             // Truncate file to newly written file size.
-            if (!truncated) {
+            if (!truncated && dataObj.pos === undefined) {
               truncated = true;
               this.truncate(this.position);
               return;
